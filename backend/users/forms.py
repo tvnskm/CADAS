@@ -67,5 +67,11 @@ class ProfileForm(forms.ModelForm):
 class StyledAuthenticationForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["username"].label = "Username or Email"
+        self.fields["username"].help_text = (
+            "You can sign in with either the login name or the email used during registration."
+        )
+        self.fields["username"].widget.attrs["autocomplete"] = "username"
+        self.fields["password"].widget.attrs["autocomplete"] = "current-password"
         for field in self.fields.values():
             field.widget.attrs["class"] = "form-control"

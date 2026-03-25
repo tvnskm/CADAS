@@ -157,6 +157,11 @@ REST_FRAMEWORK = {
     ],
 }
 
+AUTHENTICATION_BACKENDS = [
+    'users.auth_backends.UsernameOrEmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
