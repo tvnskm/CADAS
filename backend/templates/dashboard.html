@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Control Center | C-ADAS{% endblock %}
+
+{% block extra_head %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+>
+{% endblock %}
+
+{% block content %}
+{{ map_hazards|json_script:"map-hazards-data" }}
+{{ map_geofences|json_script:"map-geofences-data" }}
+
+<section class="card hero-card hero-dark mb-4">
+    <div class="card-body p-4 p-lg-5">
+        <div class="row g-4 align-items-center">
+            <div class="col-xl-7">
+                <span class="eyebrow mb-3">Editorial Control Center</span>
+                <h1 class="display-5 fw-bold mb-3">Road hazard operations, verification signals, and live map intelligence in one surface.</h1>
+                <p class="soft-text mb-4">This is the operator-facing control layer of C-ADAS: uploads feed the ML pipeline, vehicle reports verify hazards, verified hazards auto-create zones, and alerts fire through location checks.</p>
+                <div class="metric-row">
+                    <div class="metric-pill">
+                        <span class="label">Verified Hazards</span>
+                        <span class="value">{{ verified_hazards }}</span>
+                    </div>
+                    <div class="metric-pill">
+                        <span class="label">Pending Hazards</span>
+                        <span class="value">{{ pending_hazards }}</span>
+                    </div>
+                    <div class="metric-pill">
+                        <span class="label">Auto Zones</span>
+                        <span class="value">{{ auto_geofences }}</span>
+                    </div>
+                    <div class="metric-pill">
+                        <span class="label">Upload Jobs</span>
+                        <span class="value">{{ total_uploads }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-5">
+                <div id="dashboard-map" class="placeholder-map"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="split-layout section-grid">
+    <aside class="editorial-sidebar">
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Quick Actions</span>
+            <h2 class="h5">What operators do next</h2>
+            <div class="d-grid gap-2">
+                <a href="{% url 'video-upload' %}" class="btn btn-primary">Upload New Drive</a>
+                <a href="{% url 'browser-check-location' %}" class="btn btn-outline-primary">Run Location Check</a>
+                <a href="{% url 'hazard-list' %}" class="btn btn-outline-primary">Open Hazard Ledger</a>
+            </div>
+        </div>
+        <div class="mini-card">
+            <span class="eyebrow mb-2">System Snapshot</span>
+            <div class="soft-text mb-2">Total Hazards: {{ total_hazards }}</div>
+            <div class="soft-text mb-2">Recent Alerts: {{ recent_alerts|length }}</div>
+            <div class="soft-text mb-0">Active Geofence Alerts: {{ active_geofence_alerts }}</div>
+        </div>
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Interpretation</span>
+            <div class="soft-text mb-2">Vehicle Code: identifies the reporting car.</div>
+            <div class="soft-text mb-2">Upload Code: one video processing job.</div>
+            <div class="soft-text mb-0">Hazard Code: a grouped road issue built from one or more reports.</div>
+        </div>
+    </aside>
+
+    <div class="editorial-main">
+        <div class="card content-card">
+            <div class="card-body p-4">
+                <div class="section-title">
+                    <span class="eyebrow">Verified Feed</span>
+                    <h2 class="h4 mb-0">Highest-priority verified hazards</h2>
+                </div>
+                <div class="feature-grid">
+                    {% for hazard in verified_hazard_cards %}
+                        <div class="mini-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <div class="soft-text small">Hazard HZ-{{ hazard.id|stringformat:"04d" }}</div>
+                                    <h3 class="h5 mb-0">{{ hazard.hazard_type|title }}</h3>
+                                </div>
+                                <span class="status-badge verified">Verified</span>
+                            </div>
+                            <div class="soft-text mb-2">Vehicle confirmations: {{ hazard.validation_count }}</div>
+                            <div class="soft-text mb-2">Lat {{ hazard.latitude|floatformat:5 }}, Lon {{ hazard.longitude|floatformat:5 }}</div>
+                            <a href="{% url 'hazard-detail' hazard.id %}" class="btn btn-outline-primary btn-sm mt-2">Open Hazard</a>
+                        </div>
+                    {% empty %}
+                        <div class="mini-card">
+                            <h3 class="h5">No verified hazards yet</h3>
+                            <p class="soft-text mb-0">Upload videos or send reports from two different vehicle codes in the same area to verify a hazard.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-xl-7">
+                <div class="card content-card h-100">
+                    <div class="card-body p-4">
+                        <div class="section-title">
+                            <span class="eyebrow">Alert Stream</span>
+                            <h2 class="h4 mb-0">Latest operator-facing alerts</h2>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <th>Type</th>
+                                        <th>Message</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for alert in recent_alerts %}
+                                        <tr>
+                                            <td>{{ alert.vehicle_id }}</td>
+                                            <td>
+                                                <span class="type-badge {% if alert.alert_type == 'geofence' %}geofence{% else %}hazard{% endif %}">
+                                                    {{ alert.get_alert_type_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ alert.message }}</td>
+                                            <td>{{ alert.timestamp|date:"Y-m-d H:i" }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center soft-text py-4">No alerts in the stream yet.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-5">
+                <div class="card content-card h-100">
+                    <div class="card-body p-4">
+                        <div class="section-title">
+                            <span class="eyebrow">Upload Pipeline</span>
+                            <h2 class="h4 mb-0">Recent video jobs</h2>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Upload</th>
+                                        <th>Status</th>
+                                        <th>Rows</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for upload in recent_uploads %}
+                                        <tr>
+                                            <td>UP-{{ upload.id|stringformat:"04d" }}</td>
+                                            <td>
+                                                <span class="status-badge {% if upload.status == 'completed' %}verified{% elif upload.status == 'failed' %}failed{% else %}pending{% endif %}">
+                                                    {{ upload.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ upload.total_metadata_entries }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="3" class="text-center soft-text py-4">No uploads have been processed yet.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+></script>
+<script>
+    (function () {
+        const hazardData = JSON.parse(document.getElementById("map-hazards-data").textContent);
+        const geofenceData = JSON.parse(document.getElementById("map-geofences-data").textContent);
+        const map = L.map("dashboard-map", { zoomControl: false }).setView([12.9716, 77.5946], 13);
+
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+            maxZoom: 19,
+            attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+        }).addTo(map);
+
+        L.control.zoom({ position: "bottomright" }).addTo(map);
+
+        const bounds = [];
+
+        hazardData.forEach((hazard) => {
+            const marker = L.circleMarker([hazard.latitude, hazard.longitude], {
+                radius: 10,
+                color: "#ff8a3d",
+                fillColor: "#ff8a3d",
+                fillOpacity: 0.9,
+                weight: 2,
+            }).addTo(map);
+            marker.bindPopup(
+                `<strong>Hazard HZ-${String(hazard.id).padStart(4, "0")}</strong><br>` +
+                `Type: ${hazard.hazard_type}<br>` +
+                `Confirmations: ${hazard.validation_count}`
+            );
+            bounds.push([hazard.latitude, hazard.longitude]);
+        });
+
+        geofenceData.forEach((geofence) => {
+            const color = geofence.auto_generated ? "#2f73d9" : "#89c7ff";
+            const circle = L.circle([geofence.center_lat, geofence.center_lon], {
+                radius: geofence.radius,
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.12,
+                weight: 2,
+            }).addTo(map);
+            circle.bindPopup(
+                `<strong>${geofence.name}</strong><br>` +
+                `Radius: ${geofence.radius} m`
+            );
+            bounds.push([geofence.center_lat, geofence.center_lon]);
+        });
+
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [24, 24] });
+        }
+    })();
+</script>
+{% endblock %}

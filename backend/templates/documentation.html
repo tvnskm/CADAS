@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation | C-ADAS{% endblock %}
+
+{% block content %}
+<div class="marketing-shell">
+    <section class="card hero-card">
+        <div class="card-body p-4 p-lg-5">
+            <span class="eyebrow mb-3">Documentation</span>
+            <h1 class="display-6 fw-bold mb-3">How the C-ADAS workflow behaves from upload to alert.</h1>
+            <p class="soft-text mb-0">This page explains the main objects in the system and the easiest browser-only demo path for presentations or internal testing.</p>
+        </div>
+    </section>
+
+    <section class="row g-4">
+        <div class="col-lg-6">
+            <div class="mini-card">
+                <div class="section-title">
+                    <span class="eyebrow">Core Objects</span>
+                    <h2 class="h5 mb-0">Keep the language simple</h2>
+                </div>
+                <div class="soft-text">Vehicle Code: the car identity used for hazard verification.</div>
+                <div class="soft-text mt-2">Upload Code: one background video processing job.</div>
+                <div class="soft-text mt-2">Hazard Code: one grouped road issue built from one or more reports.</div>
+                <div class="soft-text mt-2">Geofence: a protective zone, manual or auto-generated from a verified hazard.</div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="mini-card">
+                <div class="section-title">
+                    <span class="eyebrow">Browser Demo</span>
+                    <h2 class="h5 mb-0">Recommended test flow</h2>
+                </div>
+                <ol class="soft-text ps-3 mb-0">
+                    <li>Register two users and assign different vehicle codes.</li>
+                    <li>Upload the same video from both users.</li>
+                    <li>Open Hazards and confirm the same issue becomes verified.</li>
+                    <li>Let the backend auto-create the hazard geofence.</li>
+                    <li>Use Check Location to trigger hazard and geofence alerts in the browser.</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-grid">
+        <div class="mini-card">
+            <span class="eyebrow mb-2">API</span>
+            <h3 class="h5">Main Endpoints</h3>
+            <p class="soft-text mb-1"><code>POST /api/report/</code></p>
+            <p class="soft-text mb-1"><code>GET /api/hazards/</code></p>
+            <p class="soft-text mb-1"><code>POST /api/check-location/</code></p>
+            <p class="soft-text mb-0"><code>POST /api/upload-video/</code></p>
+        </div>
+        <div class="mini-card">
+            <span class="eyebrow mb-2">ML</span>
+            <h3 class="h5">Inference Notes</h3>
+            <p class="soft-text mb-0">The upload worker uses the trained YOLOv8 pothole weights first and falls back only if the project-specific weight file is not present.</p>
+        </div>
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Data</span>
+            <h3 class="h5">Validation Rules</h3>
+            <p class="soft-text mb-0">A hazard is verified when at least two distinct vehicle codes report the same area within the configured radius and time window.</p>
+        </div>
+    </section>
+</div>
+{% endblock %}

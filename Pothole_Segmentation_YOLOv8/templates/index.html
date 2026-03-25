@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>C-ADAS Stage 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 40px auto;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        input[type="file"] {
+            margin: 15px 0;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .metadata-box {
+            text-align: left;
+            background: #1e1e1e;
+            color: #00ff9d;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: gray;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🚗 C-ADAS Stage 1</h1>
+    <p>Edge-Based Pothole Detection using YOLOv8</p>
+
+    <div class="card">
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="video" required>
+            <br>
+            <button type="submit">Upload & Detect</button>
+        </form>
+    </div>
+
+    {% if metadata %}
+    <div class="card">
+        <h2>Generated Metadata</h2>
+        <div class="metadata-box">
+            <div class="metadata-box">
+<pre style="white-space: pre-wrap;">
+{{ metadata }}
+</pre>
+</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        SRM University | Connected ADAS Prototype | Stage 1
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Hazard Detail | C-ADAS{% endblock %}
+
+{% block content %}
+<section class="split-layout">
+    <aside class="editorial-sidebar">
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Hazard Detail</span>
+            <h1 class="h3 mb-2">Hazard HZ-{{ hazard.id|stringformat:"04d" }}</h1>
+            <p class="soft-text mb-0">This page shows one grouped hazard and the raw reports that feed into it.</p>
+        </div>
+        <div class="mini-card">
+            <div class="soft-text small mb-1">Hazard Type</div>
+            <div class="h5 mb-3">{{ hazard.hazard_type|title }}</div>
+            <div class="soft-text small mb-1">Status</div>
+            <div class="mb-3">
+                <span class="status-badge {% if hazard.display_status == 'verified' %}verified{% else %}pending{% endif %}">
+                    {{ hazard.display_status|title }}
+                </span>
+            </div>
+            <div class="soft-text small mb-1">Vehicle Confirmations</div>
+            <div class="h5 mb-3">{{ hazard.validation_count }}</div>
+            <div class="soft-text small mb-1">Last Seen</div>
+            <div class="h5 mb-0">{{ hazard.last_reported_at|date:"Y-m-d H:i" }}</div>
+        </div>
+        <div class="mini-card">
+            <a href="{% url 'hazard-list' %}" class="btn btn-outline-primary w-100">Back to Hazard Ledger</a>
+        </div>
+    </aside>
+
+    <div class="editorial-main">
+        <div class="card content-card">
+            <div class="card-body p-4">
+                <div class="section-title">
+                    <span class="eyebrow">Location</span>
+                    <h2 class="h4 mb-0">Hazard coordinates and validation data</h2>
+                </div>
+                <div class="feature-grid">
+                    <div class="mini-card">
+                        <div class="soft-text small mb-1">Latitude</div>
+                        <div class="h5 mb-0">{{ hazard.latitude|floatformat:6 }}</div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="soft-text small mb-1">Longitude</div>
+                        <div class="h5 mb-0">{{ hazard.longitude|floatformat:6 }}</div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="soft-text small mb-1">First Seen</div>
+                        <div class="h5 mb-0">{{ hazard.first_reported_at|date:"Y-m-d H:i:s" }}</div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="soft-text small mb-1">Required Confirmations</div>
+                        <div class="h5 mb-0">{{ hazard.required_validations }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card content-card">
+            <div class="card-body p-4">
+                <div class="section-title">
+                    <span class="eyebrow">Source Reports</span>
+                    <h2 class="h4 mb-0">Every raw report linked to this hazard</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Vehicle Code</th>
+                                <th>Confidence</th>
+                                <th>Coordinates</th>
+                                <th>Timestamp</th>
+                                <th>Upload Code</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                                <tr>
+                                    <td>{{ report.vehicle_id }}</td>
+                                    <td>{{ report.confidence|floatformat:2 }}</td>
+                                    <td>{{ report.latitude|floatformat:5 }}, {{ report.longitude|floatformat:5 }}</td>
+                                    <td>{{ report.detected_at|date:"Y-m-d H:i:s" }}</td>
+                                    <td>
+                                        {% if report.video_upload %}
+                                            UP-{{ report.video_upload.id|stringformat:"04d" }}
+                                        {% else %}
+                                            Direct API
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center soft-text py-4">No raw reports were found for this hazard.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

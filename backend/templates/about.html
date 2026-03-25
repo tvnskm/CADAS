@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}About | C-ADAS{% endblock %}
+
+{% block content %}
+<div class="marketing-shell">
+    <section class="card hero-card">
+        <div class="card-body p-4 p-lg-5">
+            <span class="eyebrow mb-3">About C-ADAS</span>
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="display-6 fw-bold mb-3">A connected ADAS workflow for detecting, validating, and acting on road hazards.</h1>
+                    <p class="soft-text mb-0">This platform combines YOLOv8 video analysis, multi-vehicle hazard confirmation, automatic geofence generation, and browser-based alert testing into one cohesive backend and operator dashboard.</p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="mini-card">
+                        <div class="section-title">
+                            <span class="eyebrow">Mission</span>
+                            <h3 class="h5 mb-0">Turn raw detections into actionable road intelligence.</h3>
+                        </div>
+                        <p class="soft-text mb-0">The project is designed for experimentation first, but the architecture already separates ML inference, validation logic, geofence automation, alerts, and dashboard reporting cleanly enough to scale.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-grid">
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Detection</span>
+            <h3 class="h5">YOLOv8 Video Inference</h3>
+            <p class="soft-text mb-0">Uploaded driving videos are processed in the background, metadata is generated, and reports are inserted into the same hazard pipeline used by direct API reporting.</p>
+        </div>
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Validation</span>
+            <h3 class="h5">Multi-Vehicle Proof</h3>
+            <p class="soft-text mb-0">Nearby hazard reports from two different vehicle codes convert a pending road issue into a verified hazard, reducing false positives from a single noisy stream.</p>
+        </div>
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Response</span>
+            <h3 class="h5">Automatic Geofence Zones</h3>
+            <p class="soft-text mb-0">Once verified, a hazard automatically creates a protective geofence zone so later location checks can trigger warnings with no manual setup.</p>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Hazard Ledger | C-ADAS{% endblock %}
+
+{% block content %}
+<section class="split-layout">
+    <aside class="editorial-sidebar">
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Hazard Ledger</span>
+            <h1 class="h3 mb-2">Grouped road issues</h1>
+            <p class="soft-text mb-0">This page shows grouped hazards, not raw detections. A single hazard can be fed by multiple uploads and multiple vehicle codes.</p>
+        </div>
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Read This First</span>
+            <div class="soft-text mb-2">Hazard Code: grouped road issue.</div>
+            <div class="soft-text mb-2">Reported By: latest vehicle code seen for that hazard.</div>
+            <div class="soft-text mb-0">Verified means at least two different vehicle codes confirmed the same area.</div>
+        </div>
+    </aside>
+
+    <div class="editorial-main">
+        <div class="card content-card">
+            <div class="card-body p-4">
+                <div class="section-title">
+                    <span class="eyebrow">Live Hazard Table</span>
+                    <h2 class="h4 mb-0">Verified and pending road intelligence</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Hazard Code</th>
+                                <th>Type</th>
+                                <th>Latest Confidence</th>
+                                <th>Reported By</th>
+                                <th>Vehicle Confirmations</th>
+                                <th>Last Seen</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hazard in hazards %}
+                                <tr>
+                                    <td><a href="{% url 'hazard-detail' hazard.pk %}">HZ-{{ hazard.id|stringformat:"04d" }}</a></td>
+                                    <td>{{ hazard.hazard_type|title }}</td>
+                                    <td>
+                                        {% if hazard.latest_report %}
+                                            {{ hazard.latest_report.confidence|floatformat:2 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if hazard.latest_report %}
+                                            {{ hazard.latest_report.vehicle_id }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ hazard.validation_count }}</td>
+                                    <td>{{ hazard.last_reported_at|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        <span class="status-badge {% if hazard.display_status == 'verified' %}verified{% else %}pending{% endif %}">
+                                            {{ hazard.display_status|title }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center soft-text py-4">No hazards have been generated yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

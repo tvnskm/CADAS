@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Geofences | C-ADAS{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card content-card">
+            <div class="card-body p-4">
+                <span class="eyebrow mb-2">Zones</span>
+                <h1 class="h4 fw-bold mb-3">Create Geofence</h1>
+                <p class="soft-text">Manual geofences are optional. Verified hazards now generate their own protective auto-zones in the background.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        {% include "includes/form_field.html" with field=field %}
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">Save Geofence</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card content-card">
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <span class="eyebrow mb-2">Zone Registry</span>
+                    <h2 class="h5 mb-0">Saved Geofences</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Center Latitude</th>
+                                <th>Center Longitude</th>
+                                <th>Radius (m)</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for geofence in geofences %}
+                                <tr>
+                                    <td>{{ geofence.name }}</td>
+                                    <td>
+                                        {% if geofence.auto_generated %}
+                                            <span class="type-badge auto">Auto</span>
+                                        {% else %}
+                                            <span class="type-badge manual">Manual</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ geofence.center_lat|floatformat:5 }}</td>
+                                    <td>{{ geofence.center_lon|floatformat:5 }}</td>
+                                    <td>{{ geofence.radius|floatformat:0 }}</td>
+                                    <td>
+                                        {% if geofence.source_hazard %}
+                                            Hazard HZ-{{ geofence.source_hazard.id|stringformat:"04d" }}
+                                        {% else %}
+                                            {{ geofence.created_by.username|default:"-" }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-secondary py-4">No geofences created yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

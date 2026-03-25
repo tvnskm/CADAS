@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}C-ADAS | Connected Hazard Intelligence{% endblock %}
+
+{% block content %}
+<div class="marketing-shell">
+    <section class="card hero-card hero-dark">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-7">
+                    <span class="eyebrow mb-3">Connected ADAS Platform</span>
+                    <h1 class="display-5 fw-bold mb-3">From road video to verified hazard intelligence, geofences, and live alerts.</h1>
+                    <p class="soft-text mb-4">C-ADAS fuses YOLOv8 inference, multi-vehicle validation, automatic hazard zoning, and browser-first operations tooling into one clean monitoring stack.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'dashboard' %}" class="btn btn-primary">Open Control Center</a>
+                        {% else %}
+                            <a href="{% url 'register' %}" class="btn btn-primary">Create Account</a>
+                            <a href="{% url 'login' %}" class="btn btn-outline-light">Sign In</a>
+                        {% endif %}
+                        <a href="{% url 'documentation' %}" class="btn btn-outline-light">View Docs</a>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="feature-grid">
+                        <div class="mini-card">
+                            <span class="eyebrow mb-2">Verified Hazards</span>
+                            <div class="value display-6 fw-bold">{{ public_verified_hazards }}</div>
+                            <p class="soft-text mb-0">Road issues confirmed by more than one vehicle code.</p>
+                        </div>
+                        <div class="mini-card">
+                            <span class="eyebrow mb-2">Upload Jobs</span>
+                            <div class="value display-6 fw-bold">{{ public_uploads }}</div>
+                            <p class="soft-text mb-0">Video processing runs tracked end to end.</p>
+                        </div>
+                        <div class="mini-card">
+                            <span class="eyebrow mb-2">Alerts</span>
+                            <div class="value display-6 fw-bold">{{ public_alerts }}</div>
+                            <p class="soft-text mb-0">Saved hazard and geofence response events.</p>
+                        </div>
+                        <div class="mini-card">
+                            <span class="eyebrow mb-2">Zones</span>
+                            <div class="value display-6 fw-bold">{{ public_geofences }}</div>
+                            <p class="soft-text mb-0">Manual and auto-generated geofences combined.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-grid">
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Step 1</span>
+            <h3 class="h5">Upload Drive Video</h3>
+            <p class="soft-text mb-0">Operators upload a video and the system starts YOLO inference asynchronously without blocking the request.</p>
+        </div>
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Step 2</span>
+            <h3 class="h5">Generate Hazard Metadata</h3>
+            <p class="soft-text mb-0">Each pothole detection becomes structured metadata with confidence, time, and placeholder coordinates for downstream validation.</p>
+        </div>
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Step 3</span>
+            <h3 class="h5">Verify Across Vehicles</h3>
+            <p class="soft-text mb-0">Reports from two distinct vehicle codes in the same area turn a pending issue into a verified road hazard.</p>
+        </div>
+        <div class="mini-card">
+            <span class="eyebrow mb-2">Step 4</span>
+            <h3 class="h5">Trigger Smart Alerts</h3>
+            <p class="soft-text mb-0">Verified hazards automatically create geofence zones so location checks can return both hazard and zone warnings.</p>
+        </div>
+    </section>
+</div>
+{% endblock %}
